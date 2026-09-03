@@ -742,30 +742,140 @@ formLogin.<span class="f">addEventListener</span>(<span class="s">'submit'</span
     </div>
 
     <div class="subsec">
-      <div class="subsec-title">4.C — Enviar los nuevos campos desde el formulario</div>
+      <div class="subsec-title">4.C — Actualizar registro.js para enviar los datos al backend</div>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num">1</div>
-          <div class="step-body"><p>Abrir <code>frontend/js/registro.js</code>. Usar <strong>Ctrl+F</strong> para buscar:</p>
-            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">Buscar en registro.js</span></div><pre>await fetch('http://localhost:3000/api/auth/registro'</pre></div>
+          <div class="step-body"><p>Abrir <code>frontend/js/registro.js</code>. El archivo completo se ve así:</p>
+            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">frontend/js/registro.js — estado actual</span></div><pre><span class="c">// S17: REGISTRO — conecta el formulario con la API</span>
+
+<span class="k">const</span> URL_API_COLOMBIA = <span class="s">'https://api-colombia.com/api/v1'</span>;
+
+<span class="k">const</span> selectDepto  = document.<span class="f">querySelector</span>(<span class="s">'#reg-departamento'</span>);
+<span class="k">const</span> selectMuni   = document.<span class="f">querySelector</span>(<span class="s">'#reg-municipio'</span>);
+<span class="k">const</span> formRegistro = document.<span class="f">querySelector</span>(<span class="s">'#form-registro'</span>);
+
+<span class="k">async function</span> <span class="f">cargarDepartamentos</span>() {
+  <span class="k">try</span> {
+    selectDepto.innerHTML = <span class="s">'&lt;option value=""&gt;Cargando departamentos...&lt;/option&gt;'</span>;
+    <span class="k">const</span> respuesta     = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">`${URL_API_COLOMBIA}/Department`</span>);
+    <span class="k">const</span> departamentos = <span class="k">await</span> respuesta.<span class="f">json</span>();
+    departamentos.<span class="f">sort</span>(<span class="k">function</span>(a, b) { <span class="k">return</span> a.name.<span class="f">localeCompare</span>(b.name); });
+    selectDepto.innerHTML = <span class="s">'&lt;option value=""&gt;-- Selecciona un departamento --&lt;/option&gt;'</span>;
+    departamentos.<span class="f">forEach</span>(<span class="k">function</span>(depto) {
+      <span class="k">const</span> opcion = document.<span class="f">createElement</span>(<span class="s">'option'</span>);
+      opcion.value       = depto.id;
+      opcion.textContent = depto.name;
+      selectDepto.<span class="f">appendChild</span>(opcion);
+    });
+  } <span class="k">catch</span> (error) {
+    selectDepto.innerHTML = <span class="s">'&lt;option value=""&gt;Error al cargar. Recarga la página.&lt;/option&gt;'</span>;
+  }
+}
+
+<span class="k">async function</span> <span class="f">cargarMunicipios</span>(idDepartamento) {
+  <span class="k">try</span> {
+    selectMuni.disabled = <span class="k">true</span>;
+    selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;Cargando municipios...&lt;/option&gt;'</span>;
+    <span class="k">const</span> respuesta  = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">`${URL_API_COLOMBIA}/Department/${idDepartamento}/cities`</span>);
+    <span class="k">const</span> municipios = <span class="k">await</span> respuesta.<span class="f">json</span>();
+    municipios.<span class="f">sort</span>(<span class="k">function</span>(a, b) { <span class="k">return</span> a.name.<span class="f">localeCompare</span>(b.name); });
+    selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;-- Selecciona un municipio --&lt;/option&gt;'</span>;
+    municipios.<span class="f">forEach</span>(<span class="k">function</span>(muni) {
+      <span class="k">const</span> opcion = document.<span class="f">createElement</span>(<span class="s">'option'</span>);
+      opcion.value       = muni.name;
+      opcion.textContent = muni.name;
+      selectMuni.<span class="f">appendChild</span>(opcion);
+    });
+    selectMuni.disabled = <span class="k">false</span>;
+  } <span class="k">catch</span> (error) {
+    selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;Error al cargar municipios.&lt;/option&gt;'</span>;
+  }
+}
+
+selectDepto.<span class="f">addEventListener</span>(<span class="s">'change'</span>, <span class="k">function</span>() {
+  <span class="k">const</span> idSeleccionado = selectDepto.value;
+  <span class="k">if</span> (!idSeleccionado) {
+    selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;Primero elige un departamento&lt;/option&gt;'</span>;
+    selectMuni.disabled  = <span class="k">true</span>;
+    <span class="k">return</span>;
+  }
+  <span class="f">cargarMunicipios</span>(idSeleccionado);
+});
+
+<span class="k">if</span> (formRegistro) {
+  formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">function</span>(evento) {  <span class="c">// ← falta async</span>
+    evento.<span class="f">preventDefault</span>();
+    <span class="k">const</span> nombre    = document.<span class="f">querySelector</span>(<span class="s">'#reg-nombre'</span>).value.<span class="f">trim</span>();
+    <span class="k">const</span> email     = document.<span class="f">querySelector</span>(<span class="s">'#reg-email'</span>).value.<span class="f">trim</span>();
+    <span class="k">const</span> password  = document.<span class="f">querySelector</span>(<span class="s">'#reg-password'</span>).value;
+    <span class="k">const</span> municipio = selectMuni.value;
+    <span class="k">let</span> hayErrores  = <span class="k">false</span>;
+    <span class="c">// ... validaciones (nombre, email, password, departamento, municipio) ...</span>
+    <span class="k">if</span> (!hayErrores) {                        <span class="c">// ← aquí falta el fetch al backend</span>
+      <span class="k">const</span> usuario = { nombre, email, departamento, municipio,
+        fecha: <span class="k">new</span> <span class="f">Date</span>().<span class="f">toLocaleDateString</span>(<span class="s">'es-CO'</span>) };
+      localStorage.<span class="f">setItem</span>(<span class="s">'usuario-registro'</span>, JSON.<span class="f">stringify</span>(usuario));
+      document.<span class="f">querySelector</span>(<span class="s">'#registro-exito'</span>).style.display = <span class="s">'block'</span>;
+      formRegistro.<span class="f">reset</span>();
+      selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;Primero elige un departamento&lt;/option&gt;'</span>;
+      selectMuni.disabled  = <span class="k">true</span>;
+    }
+  });
+}
+
+<span class="f">cargarDepartamentos</span>();</pre></div>
+            <div class="question-box" style="margin-top:12px;"><strong>🔍 Analiza:</strong> Hay dos cosas marcadas con <code>← falta</code>. El código ya lee <code>password</code> del campo, pero falta: (1) agregar <code>async</code> al listener y (2) reemplazar el bloque <code>if (!hayErrores)</code> para que envíe los datos al backend — incluyendo <code>password</code> — en vez de guardarlos en <code>localStorage</code>.</div>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num">2</div>
-          <div class="step-body"><p>Encontrarás el bloque <code>body: JSON.stringify(...)</code>. Actualmente envía:</p>
-            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — estado actual del body</span></div><pre>body: JSON.<span class="f">stringify</span>({
-  nombre:   nombre,
-  email:    email,
-  password: <span class="s">'123456'</span>
-})</pre></div>
-            <div class="question-box" style="margin-top:12px;"><strong>🔍 Analiza:</strong> El backend ya puede recibir <code>departamento</code> y <code>municipio</code>. ¿Qué falta agregar aquí para que lleguen? Las variables <code>selectDepto</code> y <code>municipio</code> ya están disponibles en el archivo.</div>
+          <div class="step-body"><p>Localizar la línea del event listener. Agregar <code>async</code>:</p>
+            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — ANTES</span></div><pre>formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">function</span>(evento) {</pre></div>
+            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — DESPUÉS</span><span class="code-tag yellow">modificar</span></div><pre>formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">async function</span>(evento) {</pre></div>
           </div>
         </div>
         <div class="step-item">
           <div class="step-num">3</div>
-          <div class="step-body"><p>Actualiza el bloque con los campos que identificaste. Guardar con <strong>Ctrl+S</strong>.</p>
-            <div class="callout ok"><span class="callout-icon">✅</span><span>Registrar un usuario nuevo → MongoDB Compass → colección <code>usuarios</code> → deben aparecer <code>departamento</code> y <code>municipio</code>.</span></div>
+          <div class="step-body"><p>Localizar el bloque <code>if (!hayErrores)</code> y reemplazar <strong>todo su contenido</strong> por:</p>
+            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — reemplazar if (!hayErrores)</span><span class="code-tag yellow">modificar</span></div><pre>    <span class="k">if</span> (!hayErrores) {
+      <span class="k">try</span> {
+        <span class="k">const</span> respuesta = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">'http://localhost:3000/api/auth/registro'</span>, {
+          method:  <span class="s">'POST'</span>,
+          headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+          body: JSON.<span class="f">stringify</span>({
+            nombre:       nombre,
+            email:        email,
+            password:     password,
+            departamento: selectDepto.options[selectDepto.selectedIndex].textContent,
+            municipio:    municipio
+          })
+        });
+
+        <span class="k">const</span> datos = <span class="k">await</span> respuesta.<span class="f">json</span>();
+
+        <span class="k">if</span> (!respuesta.ok) {
+          document.<span class="f">querySelector</span>(<span class="s">'#error-reg-email'</span>).textContent =
+            datos.error || <span class="s">'Error al crear la cuenta'</span>;
+          <span class="k">return</span>;
+        }
+
+        document.<span class="f">querySelector</span>(<span class="s">'#registro-exito'</span>).style.display = <span class="s">'block'</span>;
+        formRegistro.<span class="f">reset</span>();
+        selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;Primero elige un departamento&lt;/option&gt;'</span>;
+        selectMuni.disabled  = <span class="k">true</span>;
+
+      } <span class="k">catch</span> (error) {
+        document.<span class="f">querySelector</span>(<span class="s">'#error-reg-nombre'</span>).textContent =
+          <span class="s">'No se pudo conectar. Verifica que npm run dev esté corriendo.'</span>;
+      }
+    }</pre></div>
+            <div class="callout ok"><span class="callout-icon">✅</span><span>Registrar un usuario nuevo → MongoDB Compass → colección <code>usuarios</code> → deben aparecer <code>nombre</code>, <code>email</code>, <code>password</code> (texto largo cifrado, no tu contraseña real), <code>departamento</code> y <code>municipio</code>.</span></div>
           </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-body"><p>Guardar con <strong>Ctrl+S</strong>.</p></div>
         </div>
       </div>
     </div>
@@ -789,8 +899,9 @@ formLogin.<span class="f">addEventListener</span>(<span class="s">'submit'</span
       <li><div class="check-box"></div><span>Login con credenciales correctas → mensaje verde de bienvenida</span></li>
       <li><div class="check-box"></div><span>Login con credenciales incorrectas → mensaje de error visible</span></li>
       <li><div class="check-box"></div><span><strong>Local Storage</strong> tiene <code>token</code> y <code>usuario-nombre</code> después del login</span></li>
-      <li><div class="check-box"></div><span><strong>registro.html</strong> con email nuevo → mensaje de éxito verde</span></li>
-      <li><div class="check-box"></div><span>Usuario registrado aparece en <strong>MongoDB Compass</strong> con <code>departamento</code> y <code>municipio</code></span></li>
+      <li><div class="check-box"></div><span><strong>registro.html</strong> muestra campo <strong>Contraseña</strong> (mínimo 6 caracteres)</span></li>
+      <li><div class="check-box"></div><span>Registro con email nuevo → mensaje de éxito verde</span></li>
+      <li><div class="check-box"></div><span>Usuario registrado aparece en <strong>MongoDB Compass</strong> con <code>departamento</code>, <code>municipio</code> y <code>password</code> hasheado</span></li>
     </ul>
   </section>
 
