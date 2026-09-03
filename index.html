@@ -763,12 +763,12 @@ formLogin.<span class="f">addEventListener</span>(<span class="s">'submit'</span
     </div>
 
     <div class="subsec">
-      <div class="subsec-title">4.C — Actualizar registro.js para enviar los datos al backend</div>
+      <div class="subsec-title">4.C — Digitar el código de registro.js</div>
       <div class="step-list">
         <div class="step-item">
           <div class="step-num">1</div>
-          <div class="step-body"><p>Abrir <code>frontend/js/registro.js</code>. El archivo completo se ve así:</p>
-            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">frontend/js/registro.js — estado actual</span></div><pre><span class="c">// S17: REGISTRO — conecta el formulario con la API</span>
+          <div class="step-body"><p>Abrir <code>frontend/js/registro.js</code>. Digitar el siguiente código línea por línea — <strong>no copiar y pegar</strong>. Leer cada línea antes de escribirla:</p>
+            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">frontend/js/registro.js</span><span class="code-tag yellow">digitar</span></div><pre><span class="c">// S17: REGISTRO — conecta el formulario con la API</span>
 
 <span class="k">const</span> URL_API_COLOMBIA = <span class="s">'https://api-colombia.com/api/v1'</span>;
 
@@ -825,41 +825,53 @@ selectDepto.<span class="f">addEventListener</span>(<span class="s">'change'</sp
 });
 
 <span class="k">if</span> (formRegistro) {
-  formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">function</span>(evento) {  <span class="c">// ← falta async</span>
+  formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">async function</span>(evento) {
     evento.<span class="f">preventDefault</span>();
+
     <span class="k">const</span> nombre    = document.<span class="f">querySelector</span>(<span class="s">'#reg-nombre'</span>).value.<span class="f">trim</span>();
     <span class="k">const</span> email     = document.<span class="f">querySelector</span>(<span class="s">'#reg-email'</span>).value.<span class="f">trim</span>();
     <span class="k">const</span> password  = document.<span class="f">querySelector</span>(<span class="s">'#reg-password'</span>).value;
     <span class="k">const</span> municipio = selectMuni.value;
     <span class="k">let</span> hayErrores  = <span class="k">false</span>;
-    <span class="c">// ... validaciones (nombre, email, password, departamento, municipio) ...</span>
-    <span class="k">if</span> (!hayErrores) {                        <span class="c">// ← aquí falta el fetch al backend</span>
-      <span class="k">const</span> usuario = { nombre, email, departamento, municipio,
-        fecha: <span class="k">new</span> <span class="f">Date</span>().<span class="f">toLocaleDateString</span>(<span class="s">'es-CO'</span>) };
-      localStorage.<span class="f">setItem</span>(<span class="s">'usuario-registro'</span>, JSON.<span class="f">stringify</span>(usuario));
-      document.<span class="f">querySelector</span>(<span class="s">'#registro-exito'</span>).style.display = <span class="s">'block'</span>;
-      formRegistro.<span class="f">reset</span>();
-      selectMuni.innerHTML = <span class="s">'&lt;option value=""&gt;Primero elige un departamento&lt;/option&gt;'</span>;
-      selectMuni.disabled  = <span class="k">true</span>;
-    }
-  });
-}
 
-<span class="f">cargarDepartamentos</span>();</pre></div>
-            <div class="question-box" style="margin-top:12px;"><strong>🔍 Analiza:</strong> Hay dos cosas marcadas con <code>← falta</code>. El código ya lee <code>password</code> del campo, pero falta: (1) agregar <code>async</code> al listener y (2) reemplazar el bloque <code>if (!hayErrores)</code> para que envíe los datos al backend — incluyendo <code>password</code> — en vez de guardarlos en <code>localStorage</code>.</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">2</div>
-          <div class="step-body"><p>Localizar la línea del event listener. Agregar <code>async</code>:</p>
-            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — ANTES</span></div><pre>formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">function</span>(evento) {</pre></div>
-            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — DESPUÉS</span><span class="code-tag yellow">modificar</span></div><pre>formRegistro.<span class="f">addEventListener</span>(<span class="s">'submit'</span>, <span class="k">async function</span>(evento) {</pre></div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">3</div>
-          <div class="step-body"><p>Localizar el bloque <code>if (!hayErrores)</code> y reemplazar <strong>todo su contenido</strong> por:</p>
-            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">registro.js — reemplazar if (!hayErrores)</span><span class="code-tag yellow">modificar</span></div><pre>    <span class="k">if</span> (!hayErrores) {
+    <span class="c">// Limpiar errores anteriores</span>
+    document.<span class="f">querySelector</span>(<span class="s">'#error-reg-nombre'</span>).textContent      = <span class="s">''</span>;
+    document.<span class="f">querySelector</span>(<span class="s">'#error-reg-email'</span>).textContent       = <span class="s">''</span>;
+    document.<span class="f">querySelector</span>(<span class="s">'#error-reg-password'</span>).textContent    = <span class="s">''</span>;
+    document.<span class="f">querySelector</span>(<span class="s">'#error-reg-departamento'</span>).textContent = <span class="s">''</span>;
+    document.<span class="f">querySelector</span>(<span class="s">'#error-reg-municipio'</span>).textContent   = <span class="s">''</span>;
+
+    <span class="c">// Validar nombre</span>
+    <span class="k">if</span> (nombre.length &lt; <span class="y">3</span>) {
+      document.<span class="f">querySelector</span>(<span class="s">'#error-reg-nombre'</span>).textContent = <span class="s">'Escribe tu nombre completo'</span>;
+      hayErrores = <span class="k">true</span>;
+    }
+
+    <span class="c">// Validar email</span>
+    <span class="k">if</span> (!email.<span class="f">includes</span>(<span class="s">'@'</span>) || email.length &lt; <span class="y">5</span>) {
+      document.<span class="f">querySelector</span>(<span class="s">'#error-reg-email'</span>).textContent = <span class="s">'Ingresa un correo válido'</span>;
+      hayErrores = <span class="k">true</span>;
+    }
+
+    <span class="c">// Validar password</span>
+    <span class="k">if</span> (password.length &lt; <span class="y">6</span>) {
+      document.<span class="f">querySelector</span>(<span class="s">'#error-reg-password'</span>).textContent = <span class="s">'La contraseña debe tener al menos 6 caracteres'</span>;
+      hayErrores = <span class="k">true</span>;
+    }
+
+    <span class="c">// Validar departamento</span>
+    <span class="k">if</span> (!selectDepto.value) {
+      document.<span class="f">querySelector</span>(<span class="s">'#error-reg-departamento'</span>).textContent = <span class="s">'Selecciona un departamento'</span>;
+      hayErrores = <span class="k">true</span>;
+    }
+
+    <span class="c">// Validar municipio</span>
+    <span class="k">if</span> (!municipio) {
+      document.<span class="f">querySelector</span>(<span class="s">'#error-reg-municipio'</span>).textContent = <span class="s">'Selecciona un municipio'</span>;
+      hayErrores = <span class="k">true</span>;
+    }
+
+    <span class="k">if</span> (!hayErrores) {
       <span class="k">try</span> {
         <span class="k">const</span> respuesta = <span class="k">await</span> <span class="f">fetch</span>(<span class="s">'http://localhost:3000/api/auth/registro'</span>, {
           method:  <span class="s">'POST'</span>,
@@ -890,13 +902,25 @@ selectDepto.<span class="f">addEventListener</span>(<span class="s">'change'</sp
         document.<span class="f">querySelector</span>(<span class="s">'#error-reg-nombre'</span>).textContent =
           <span class="s">'No se pudo conectar. Verifica que npm run dev esté corriendo.'</span>;
       }
-    }</pre></div>
-            <div class="callout ok"><span class="callout-icon">✅</span><span>Registrar un usuario nuevo → MongoDB Compass → colección <code>usuarios</code> → deben aparecer <code>nombre</code>, <code>email</code>, <code>password</code> (texto largo cifrado, no tu contraseña real), <code>departamento</code> y <code>municipio</code>.</span></div>
+    }
+  });
+}
+
+<span class="f">cargarDepartamentos</span>();</pre></div>
+            <div class="callout info" style="margin-top:12px;"><span class="callout-icon">💡</span><span><strong>¿Qué hace este código?</strong> Lee los 5 campos del formulario, valida cada uno, y si todo está bien envía los datos al backend con <code>fetch</code>. El backend recibe la contraseña, la cifra con bcrypt, y guarda el usuario en MongoDB.</span></div>
           </div>
         </div>
         <div class="step-item">
-          <div class="step-num">4</div>
-          <div class="step-body"><p>Guardar con <strong>Ctrl+S</strong>.</p></div>
+          <div class="step-num">2</div>
+          <div class="step-body"><p>Guardar con <strong>Ctrl+S</strong>. Verificar:</p>
+            <ul style="margin-top:8px;padding-left:20px;font-size:13px;color:var(--txt-dim);display:flex;flex-direction:column;gap:6px;">
+              <li>Clic derecho sobre <code>frontend/registro.html</code> → <strong>Open with Live Server</strong></li>
+              <li>Llenar el formulario con un email que no exista en MongoDB y una contraseña de al menos 6 caracteres</li>
+              <li>Debe aparecer el mensaje verde de éxito</li>
+            </ul>
+            <div class="callout ok" style="margin-top:12px;"><span class="callout-icon">✅</span><span>MongoDB Compass → colección <code>usuarios</code> → el usuario nuevo aparece con <code>nombre</code>, <code>email</code>, <code>password</code> (texto largo cifrado, no tu contraseña real), <code>departamento</code> y <code>municipio</code>.</span></div>
+            <div class="callout err"><span class="callout-icon">❌</span><span>Si ves <strong>"Error al crear la cuenta"</strong> → el email ya existe en MongoDB. Usa uno diferente.</span></div>
+          </div>
         </div>
       </div>
     </div>
