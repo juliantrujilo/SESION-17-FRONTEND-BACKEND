@@ -692,7 +692,28 @@ formLogin.<span class="f">addEventListener</span>(<span class="s">'submit'</span
       <span class="step-badge">Paso 4</span>
       <h2 class="section-title">Conectar el formulario de Registro a la API</h2>
     </div>
-    <p style="color:var(--txt-dim);font-size:14px;margin-bottom:24px;">El formulario ya existe. Vamos a hacer que envíe los datos al backend — incluyendo departamento y municipio.</p>
+    <p style="color:var(--txt-dim);font-size:14px;margin-bottom:24px;">El formulario ya existe. Vamos a verificar que tiene el campo contraseña y luego conectarlo al backend.</p>
+
+    <div class="subsec">
+      <div class="subsec-title">4.0 — Verificar el formulario de registro</div>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body"><p>Abrir <code>frontend/registro.html</code>. Buscar con <strong>Ctrl+F</strong> el texto <code>reg-password</code>. Debe existir este bloque entre el campo de email y el de departamento:</p>
+            <div class="code-wrap"><div class="code-header"><div class="code-dots"><span class="code-dot r"></span><span class="code-dot y"></span><span class="code-dot g"></span></div><span class="code-filename">frontend/registro.html — campo contraseña</span><span class="code-tag green">verificar</span></div><pre><span class="c">&lt;!-- CAMPO CONTRASEÑA --&gt;</span>
+<span class="f">&lt;div</span> <span class="n">class</span>=<span class="s">"campo"</span><span class="f">&gt;</span>
+  <span class="f">&lt;label</span> <span class="n">for</span>=<span class="s">"reg-password"</span><span class="f">&gt;</span>Contraseña<span class="f">&lt;/label&gt;</span>
+  <span class="f">&lt;input</span> <span class="n">type</span>=<span class="s">"password"</span> <span class="n">id</span>=<span class="s">"reg-password"</span>
+         <span class="n">placeholder</span>=<span class="s">"Mínimo 6 caracteres"</span>
+         <span class="n">autocomplete</span>=<span class="s">"new-password"</span><span class="f">&gt;</span>
+  <span class="f">&lt;span</span> <span class="n">class</span>=<span class="s">"error"</span> <span class="n">id</span>=<span class="s">"error-reg-password"</span><span class="f">&gt;&lt;/span&gt;</span>
+<span class="f">&lt;/div&gt;</span></pre></div>
+            <div class="callout ok"><span class="callout-icon">✅</span><span>Si el bloque existe → continuar al Paso 4.A.</span></div>
+            <div class="callout err"><span class="callout-icon">❌</span><span>Si <strong>no existe</strong> → agrégalo manualmente entre el campo <code>reg-email</code> y el <code>reg-departamento</code>. Guardar con <strong>Ctrl+S</strong>.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="subsec">
       <div class="subsec-title">4.A — Agregar campos al modelo del backend</div>
