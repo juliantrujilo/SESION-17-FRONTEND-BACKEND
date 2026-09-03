@@ -832,6 +832,7 @@ selectDepto.<span class="f">addEventListener</span>(<span class="s">'change'</sp
     <span class="k">const</span> email     = document.<span class="f">querySelector</span>(<span class="s">'#reg-email'</span>).value.<span class="f">trim</span>();
     <span class="k">const</span> password  = document.<span class="f">querySelector</span>(<span class="s">'#reg-password'</span>).value;
     <span class="k">const</span> municipio = selectMuni.value;
+    <span class="c">// departamento no se guarda en variable — se lee directamente en el fetch</span>
     <span class="k">let</span> hayErrores  = <span class="k">false</span>;
 
     <span class="c">// Limpiar errores anteriores</span>
@@ -900,14 +901,14 @@ selectDepto.<span class="f">addEventListener</span>(<span class="s">'change'</sp
 
       } <span class="k">catch</span> (error) {
         document.<span class="f">querySelector</span>(<span class="s">'#error-reg-nombre'</span>).textContent =
-          <span class="s">'No se pudo conectar. Verifica que npm run dev esté corriendo.'</span>;
+          <span class="s">'No se pudo conectar. Verifica que node server.js esté corriendo.'</span>;
       }
     }
   });
 }
 
 <span class="f">cargarDepartamentos</span>();</pre></div>
-            <div class="callout info" style="margin-top:12px;"><span class="callout-icon">💡</span><span><strong>¿Qué hace este código?</strong> Lee los 5 campos del formulario, valida cada uno, y si todo está bien envía los datos al backend con <code>fetch</code>. El backend recibe la contraseña, la cifra con bcrypt, y guarda el usuario en MongoDB.</span></div>
+            <div class="callout info" style="margin-top:12px;"><span class="callout-icon">💡</span><span><strong>¿Qué hace este código?</strong> Lee los 5 campos del formulario, valida cada uno, y si todo está bien envía los datos al backend con <code>fetch</code>. El backend recibe la contraseña, la cifra con bcrypt, y guarda el usuario en MongoDB.<br><br><strong>¿Por qué no hay <code>const departamento</code>?</strong> El departamento se usa una sola vez — dentro del <code>body</code> del fetch. No vale la pena guardar el valor en una variable si solo se necesita en ese lugar. Se lee directamente con <code>selectDepto.options[selectDepto.selectedIndex].textContent</code> porque lo que necesitamos es el <em>nombre</em> del departamento (el texto visible), no el <code>id</code> numérico que guarda el <code>value</code> del select.</span></div>
           </div>
         </div>
         <div class="step-item">
